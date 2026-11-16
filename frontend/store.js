@@ -1,5 +1,14 @@
 import { rewriteWikiLinks } from './markdown.js';
 
+function createId() {
+  if (typeof globalThis.crypto.randomUUID === 'function') return globalThis.crypto.randomUUID();
+  const bytes = globalThis.crypto.getRandomValues(new Uint8Array(16));
+  bytes[6] = (bytes[6] & 0x0f) | 0x40;
+  bytes[8] = (bytes[8] & 0x3f) | 0x80;
+  const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+  return [hex.slice(0, 8), hex.slice(8, 12), hex.slice(12, 16), hex.slice(16, 20), hex.slice(20)].join('-');
+}
+
 export const noteTitle = (note) => note.title.trim() || 'Без названия';
 export const notePath = (note) => [note.folder, noteTitle(note)].filter(Boolean).join('/');
 export const inFolder = (path, folder) => path === folder || path.startsWith(`${folder}/`);
@@ -164,7 +173,7 @@ export class NotesStore {
 
   create(title = '', folder = '', body = '') {
     const now = new Date().toISOString();
-    const note = { id: crypto.randomUUID(), title, folder, body, pinned: false, created_at: now, updated_at: now };
+    const note = { id: createId(), title, folder, body, pinned: false, created_at: now, updated_at: now };
     this.notes.unshift(note);
     this.select(note.id);
     this.save();

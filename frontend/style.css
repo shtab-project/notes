@@ -24,7 +24,7 @@ h1, h2, p { margin: 0; }
 .button.primary:hover { background: var(--accent-hover, #6552a5); }
 .button:active { transform: scale(.98); }
 .notes-layout { --explorer-width: 232px; --editor-gutter: 16px; display: grid; grid-template-columns: minmax(0, 1fr) var(--explorer-width); grid-template-areas: 'toolbar toolbar' 'editor explorer'; width: min(100%, calc(72rem + var(--explorer-width) + var(--editor-gutter))); margin-inline: auto; overflow: hidden; }
-.notes-sidebar { grid-area: explorer; min-width: 0; background: color-mix(in srgb, var(--panel) 94%, transparent); border-inline-start: 1px solid var(--line); }
+.notes-sidebar { grid-area: explorer; min-width: 0; background: transparent; border-inline-start: 1px solid var(--line); }
 .explorer-heading { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 4px 7px 10px; }
 .explorer-heading h2 { font-size: 13px; font-weight: 600; }
 .explorer-heading .text-button { display: inline-flex; align-items: center; gap: 3px; }

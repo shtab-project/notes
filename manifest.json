@@ -1,7 +1,7 @@
 {
   "id": "notes",
   "name": "Заметки",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "url": "local:notes",
   "backend_entrypoint": "shtab_notes.main:register",
   "mcp_entrypoint": "shtab_notes.mcp:register_tools",

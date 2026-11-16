@@ -79,7 +79,7 @@ class NotesElement extends HTMLElement {
             <button class="icon-button" data-action="import" title="Импорт Markdown" aria-label="Импорт Markdown">⇧</button>
           </div>
           <label class="search">${icon('search')}<input type="search" aria-label="Найти заметку" placeholder="Найти заметку"></label>
-          <div class="list-filters" role="group" aria-label="Фильтр заметок"><button data-filter="all" aria-pressed="true">Все заметки</button><button data-filter="pinned" aria-pressed="false">${icon('pin')}Закреплённые</button></div>
+          <div class="explorer-heading"><h2>Все заметки</h2><button class="text-button" data-action="folder">${icon('plus')}Папка</button></div>
           <input class="import-file" type="file" accept=".md,.markdown,text/markdown" multiple hidden>
           <div class="note-list" aria-label="Список заметок"></div>
           <div class="tag-list" aria-label="Теги"></div>
@@ -209,8 +209,12 @@ class NotesElement extends HTMLElement {
     root.querySelectorAll('[data-filter]').forEach((button) => button.setAttribute('aria-pressed',
       String((button.dataset.filter === 'pinned') === this.pinned)));
     const notes = this.filtered();
-    const filtered = Boolean(this.query || this.pinned || this.tag);
-    const items = filtered ? notes.map((note) => this.noteItem(note, true)).join('') : this.tree(notes);
+    root.querySelector('.explorer-heading button').hidden = !this.store.editable;
+    const filtered = Boolean(this.query || this.tag);
+    const pinned = notes.filter((note) => note.pinned);
+    const regular = notes.filter((note) => !note.pinned);
+    const pinnedItems = pinned.length ? `<div class="explorer-label">${icon('pin')}Закреплённые</div>${pinned.map((note) => this.noteItem(note, true)).join('')}` : '';
+    const items = pinnedItems + (filtered ? regular.map((note) => this.noteItem(note, true)).join('') : this.tree(regular));
     const list = root.querySelector('.note-list');
     const scroll = list.scrollTop;
     list.innerHTML = (items || `<p class="list-empty">${filtered ? 'Ничего не найдено' : 'Пока нет заметок'}</p>`)

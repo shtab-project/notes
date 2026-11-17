@@ -2,6 +2,7 @@ import { NotesStore, noteTitle as title, notePath, resolveNote, inFolder, parent
 import { escape, markdown, tags, wikiLinks } from './markdown.js';
 
 const explorerItem = '.note-item[data-id], .folder-name[data-folder]';
+const creationDate = new Intl.DateTimeFormat('ru', { day: '2-digit', month: '2-digit', year: 'numeric' });
 const noteDate = new Intl.DateTimeFormat('ru', { dateStyle: 'medium', timeStyle: 'short' });
 
 const paths = {
@@ -228,7 +229,13 @@ class NotesElement extends HTMLElement {
   noteItem(note, showPath = false) {
     const active = note.id === this.store.activeId;
     return `<button class="note-item${active ? ' selected' : ''}" draggable="${this.store.editable}" ${this.store.editable ? 'aria-haspopup="menu"' : ''} data-action="select" data-id="${escape(note.id)}" ${active ? 'aria-current="true"' : ''}>
-      <span class="item-title">${icon(note.pinned ? 'pin' : 'note')}${escape(title(note))}</span>${this.noteMetadata(note, true)}${showPath && note.folder ? `<span class="item-preview">${escape(note.folder)}</span>` : ''}</button>`;
+      <span class="item-heading"><span class="item-title">${icon(note.pinned ? 'pin' : 'note')}${escape(title(note))}</span>${this.creationTime(note)}</span>${this.noteMetadata(note, true)}${showPath && note.folder ? `<span class="item-preview">${escape(note.folder)}</span>` : ''}</button>`;
+  }
+
+  creationTime(note) {
+    const date = new Date(note.created_at);
+    if (!Number.isFinite(date.getTime())) return '';
+    return `<time class="item-date" datetime="${escape(note.created_at)}" title="Создано: ${escape(noteDate.format(date))}">${creationDate.format(date)}</time>`;
   }
 
   noteMetadata(note, compact = false) {

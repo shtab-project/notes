@@ -1,1 +1,1 @@
-"""Независимая история миграций Todo."""
+"""Notes' own migration history."""

@@ -1,1 +1,1 @@
-"""Плагин заметок Shtab."""
+"""Shtab notes plugin."""

@@ -5,19 +5,19 @@ from shtab_core.config import settings
 from sqlalchemy import pool
 from sqlalchemy.ext.asyncio import create_async_engine
 
-from shtab_notes.models import metadata
+from shtab_notes.models import Base
 
 config = context.config
 
 
 def include_name(name, type_, parent_names):
-    # Autogenerate не должен предлагать удаление таблиц ядра и других плагинов.
+    # Autogenerate must not propose dropping core or other plugins' tables.
     return type_ != "table" or name.startswith("notes_")
 
 
 def configure(**kwargs):
     context.configure(
-        target_metadata=metadata,
+        target_metadata=Base.metadata,
         version_table="notes_alembic_version",
         include_name=include_name,
         compare_type=True,
@@ -48,7 +48,7 @@ if context.is_offline_mode():
     )
     with context.begin_transaction():
         context.run_migrations()
-elif (connection := config.attributes.get("connection")) is not None:
+elif connection := config.attributes.get("connection"):
     run(connection)
 else:
     asyncio.run(run_async())

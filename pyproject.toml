@@ -1,7 +1,7 @@
 [project]
 name = "shtab-notes"
 version = "0.1.4"
-description = "Заметки Shtab"
+description = "Shtab notes plugin"
 requires-python = ">=3.13"
 dependencies = ["shtab-core>=0.1.0", "fastapi>=0.140"]
 

@@ -1,47 +1,40 @@
+from uuid import UUID
+
 from shtab_core.models import User
-from sqlalchemy import (
-    JSON,
-    Boolean,
-    CheckConstraint,
-    Column,
-    ForeignKey,
-    Integer,
-    MetaData,
-    String,
-    Table,
-    Text,
-    Uuid,
-)
+from sqlalchemy import JSON, CheckConstraint, ForeignKey, String, Text
+from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
-metadata = MetaData()
 
-workspaces = Table(
-    "notes_workspaces",
-    metadata,
-    Column("key", String(36), primary_key=True),
-    Column("revision", Integer, nullable=False),
-    Column("folders", JSON, nullable=False),
-    Column("imports", JSON, nullable=False),
-)
+class Base(DeclarativeBase):
+    pass
 
-notes = Table(
-    "notes_entries",
-    metadata,
-    Column("id", Uuid, primary_key=True),
-    Column(
-        "owner_id",
-        Uuid,
-        ForeignKey(User.__table__.c.id, ondelete="RESTRICT"),
-        nullable=False,
-        index=True,
-    ),
-    Column("visibility", String(7), nullable=False, index=True),
-    Column("title", String(200), nullable=False),
-    Column("folder", Text, nullable=False),
-    Column("body", Text, nullable=False),
-    Column("pinned", Boolean, nullable=False),
-    Column("created_at", String(40), nullable=False),
-    Column("updated_at", String(40), nullable=False),
-    Column("published_at", String(40)),
-    CheckConstraint("visibility IN ('private', 'shared')", name="ck_notes_visibility"),
-)
+
+class NotesWorkspace(Base):
+    __tablename__ = "notes_workspaces"
+
+    key: Mapped[str] = mapped_column(String(36), primary_key=True)
+    revision: Mapped[int]
+    folders: Mapped[list[str]] = mapped_column(JSON)
+    imports: Mapped[list[str]] = mapped_column(JSON)
+
+
+class NoteEntry(Base):
+    __tablename__ = "notes_entries"
+    __table_args__ = (
+        CheckConstraint(
+            "visibility IN ('private', 'shared')", name="ck_notes_visibility"
+        ),
+    )
+
+    id: Mapped[UUID] = mapped_column(primary_key=True)
+    owner_id: Mapped[UUID] = mapped_column(
+        ForeignKey(User.__table__.c.id, ondelete="RESTRICT"), index=True
+    )
+    visibility: Mapped[str] = mapped_column(String(7), index=True)
+    title: Mapped[str] = mapped_column(String(200))
+    folder: Mapped[str] = mapped_column(Text)
+    body: Mapped[str] = mapped_column(Text)
+    pinned: Mapped[bool]
+    created_at: Mapped[str] = mapped_column(String(40))
+    updated_at: Mapped[str] = mapped_column(String(40))
+    published_at: Mapped[str | None] = mapped_column(String(40))

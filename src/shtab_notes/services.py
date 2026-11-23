@@ -1,33 +1,39 @@
+"""Note scenarios for the MCP tools."""
+
+from dataclasses import dataclass
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from mcp.server.mcpserver.exceptions import ToolError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
-from shtab_notes.schemas import NoteIn, Visibility
+from shtab_notes.schemas import CreatedNote, NoteIn, NoteOut, NoteSummary, Visibility
 from shtab_notes.storage import NotesStorage
 
 
+@dataclass
 class NotesService:
-    def __init__(self, factory: async_sessionmaker[AsyncSession]) -> None:
-        self.factory = factory
+    factory: async_sessionmaker[AsyncSession]
 
     async def list_notes(
         self, user_id: UUID, visibility: Visibility, query: str, limit: int
-    ) -> list[dict]:
+    ) -> list[NoteSummary]:
         async with self.factory() as session:
             return await NotesStorage(session, user_id, visibility).list_notes(
                 query, limit
             )
 
-    async def get(self, user_id: UUID, visibility: Visibility, note_id: UUID) -> dict:
+    async def get(
+        self, user_id: UUID, visibility: Visibility, note_id: UUID
+    ) -> NoteOut:
         async with self.factory() as session:
             note = await NotesStorage(session, user_id, visibility).get(note_id)
-        if note is None:
-            raise ToolError("Заметка не найдена")
+
+        if not note:
+            raise ToolError("Note not found")
         return note
 
-    async def create_private(self, user_id: UUID, title: str, body: str) -> dict:
+    async def create_private(self, user_id: UUID, title: str, body: str) -> CreatedNote:
         now = datetime.now(UTC)
         note = NoteIn(
             id=uuid4(),
@@ -38,6 +44,8 @@ class NotesService:
             created_at=now,
             updated_at=now,
         )
+
         async with self.factory.begin() as session:
             await NotesStorage(session, user_id, "private").create(note)
-        return {"id": str(note.id), "title": note.title, "visibility": "private"}
+
+        return CreatedNote(id=note.id, title=note.title, visibility="private")
